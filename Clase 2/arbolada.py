@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 narchivo="arbolado-en-espacios-verdes.csv"
 
@@ -66,6 +67,13 @@ def contar_ejemplares(lista_arboles) -> list:
     
 ejemplares= contar_ejemplares(parques)
 
+def contar_ejemplares2(lista_arboles) -> list:
+
+    res = lista_arboles["nombre_com"].value_counts(dropna = False)
+    return res
+    
+
+
 #print(ejemplares)
     
 
@@ -76,7 +84,7 @@ ejemplares= contar_ejemplares(parques)
 ###########ME PARECE Q LO HICE MAL, EL PRIMER EJERCICIO NO DEVUELVE UNA LISTA DE DICCIONARIOS, SI NO UN DATAFRAME
 
 
-"""def leer_parque2(narchivo:str,parque:str):
+def leer_parque2(narchivo:str,parque:str):
 
 
     df = pd.read_csv(narchivo, index_col = 2)
@@ -100,7 +108,7 @@ ejemplares= contar_ejemplares(parques)
 print((leer_parque2(narchivo,parque))[112])
 
 
-"""
+
 
 #######ESTO ES SI ES QUE HUBIERE DEVOLVERE LISTERE.
 
@@ -126,4 +134,43 @@ alturas=obtener_alturas(parques,"Jacarandá")
 print(alturas.agg("max"))
 
 
+
 #muchas dudas
+
+
+#5. Escribir una función obtener_inclinaciones(lista_arboles, especie)
+#que, dada una lista como la generada con leer_parque(...) y una especie
+#de árbol, devuelva una lista con las inclinaciones (columna 'inclinacio') de
+#los ejemplares de esa especie.
+
+def obtener_inclinaciones(lista_arboles, especie):
+
+    inclinaciones = lista_arboles[lista_arboles["nombre_com"]==especie]
+
+    inclinacionesEspecies = inclinaciones["inclinacio"]
+
+    return inclinacionesEspecies
+
+
+
+def especimen_mas_inclinado(lista_arboles):
+    especies = especie(lista_arboles)
+
+    inclinacionMax= []
+
+    especieMax= ""
+
+    inclinacionMax = 0
+
+    for i in range(len(especies)):
+        incls = obtener_inclinaciones(lista_arboles,especies)
+        inclinacionIterar=incls.agg("max")
+
+        if inclinacionIterar > inclinacionMax:
+            especieMax == especies[i]
+
+    return [especieMax,inclinacionMax]
+        
+
+
+
