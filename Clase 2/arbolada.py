@@ -41,7 +41,9 @@ def especies(lista_arboles) -> list:        #lista arboles es un csv
 
 
 
-especie= especies(parques)
+prueba= especies(parques)
+
+#print(prueba)
 
 #print(parques.shape[0])
 
@@ -105,7 +107,7 @@ def leer_parque2(narchivo:str,parque:str):
 
     return listaDic
 
-print((leer_parque2(narchivo,parque))[112])
+#print((leer_parque2(narchivo,parque))[112])
 
 
 
@@ -131,7 +133,7 @@ alturas=obtener_alturas(parques,"Jacarandá")
 
 #print(alturas)
 
-print(alturas.agg("max"))
+#print(alturas.agg("max"))
 
 
 
@@ -143,7 +145,7 @@ print(alturas.agg("max"))
 #de árbol, devuelva una lista con las inclinaciones (columna 'inclinacio') de
 #los ejemplares de esa especie.
 
-def obtener_inclinaciones(lista_arboles, especie):
+def obtener_inclinaciones(lista_arboles, especie:str):
 
     inclinaciones = lista_arboles[lista_arboles["nombre_com"]==especie]
 
@@ -153,24 +155,95 @@ def obtener_inclinaciones(lista_arboles, especie):
 
 
 
-def especimen_mas_inclinado(lista_arboles):
-    especies = especie(lista_arboles)
-
-    inclinacionMax= []
+def especimen_mas_inclinado(lista_arboles  ):       #-->DF
+    especie:list = especies(lista_arboles)
 
     especieMax= ""
 
     inclinacionMax = 0
 
-    for i in range(len(especies)):
-        incls = obtener_inclinaciones(lista_arboles,especies)
+    for i in range(len(especie)):
+        incls = obtener_inclinaciones(lista_arboles,especie[i])
         inclinacionIterar=incls.agg("max")
 
         if inclinacionIterar > inclinacionMax:
-            especieMax == especies[i]
+            especieMax = especie[i]
+            inclinacionMax = inclinacionIterar
 
     return [especieMax,inclinacionMax]
-        
+
+
+a = especimen_mas_inclinado(parques)
+
+parqueCentenario = leer_parque(narchivo,"CENTENARIO")
+losAndes = leer_parque(narchivo, "ANDES, LOS")
+
+b = especimen_mas_inclinado(parqueCentenario)
+
+
+"""
+7. Volver a combinar las funciones anteriores para escribir la función
+especie_promedio_mas_inclinada(lista_arboles) que, dada una lista
+de árboles devuelva la especie que en promedio tiene la mayor inclinación y el
+promedio calculado.
+Resultados. Debería obtenerse, por ejemplo, que los Álamos Plateados del
+Parque Los Andes tiene un promedio de inclinación de 25 grados
+"""
+
+def especie_promedio_mas_inclinad(lista_arboles):
+    especie:list = especies(lista_arboles)
+
+    inclinacionMaxProm:float= 0.0 
+
+    especieMax= ""
+
+    promedioMax:float = 0.0
+
+    
+
+    for i in range(len(especie)):
+        incls = obtener_inclinaciones(lista_arboles,especie[i])
+        inclinacionIterar=incls.agg("mean")
+
+        if inclinacionIterar > inclinacionMaxProm:
+            especieMax = especie[i]
+            inclinacionMaxProm = inclinacionIterar
+
+    return [especieMax,inclinacionMaxProm]
+
+c = especie_promedio_mas_inclinad(losAndes)
 
 
 
+
+
+
+
+#VAMOS A ARMAR UN DF
+
+narchivo="arbolado-publico-lineal-2017-2018.csv"
+
+
+dfVeredas= pd.read_csv(narchivo)
+
+dfVeredasPosta = dfVeredas[["nombre_cientifico","ancho_acera","diametro_altura_pecho","altura_arbol"]]
+
+especiesSeleccionadas=['Tilia x moltkei', 'Jacaranda mimosifolia', 'Tipuana tipu']
+
+
+df = pd.read_csv("arbolado-en-espacios-verdes.csv", index_col = 2)
+
+#print(df)
+
+parquesJacaranda = df[["nombre_com"]]
+
+#parquesJacaranda = df[df["nombre_com"]==('Jacarandá')]
+
+
+pjr=parquesJacaranda.copy()
+
+pjr.rename(columns={"altura_tot": "altura_arbol", "nombre_com": "nombre_cientifico","diametro":"diametro_altura_pecho"},inplace=True)
+
+print(pjr.columns)
+
+#ya esta el de los parques con las columnas cambiadas, resta comparar
