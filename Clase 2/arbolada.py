@@ -83,31 +83,6 @@ def contar_ejemplares2(lista_arboles) -> list:
 
 
 
-###########ME PARECE Q LO HICE MAL, EL PRIMER EJERCICIO NO DEVUELVE UNA LISTA DE DICCIONARIOS, SI NO UN DATAFRAME
-
-
-def leer_parque2(narchivo:str,parque:str):
-
-
-    df = pd.read_csv(narchivo, index_col = 2)
-
-
-
-    res= df[df["espacio_ve"]==parque]
-
-    listaDic = []
-
-
-    for i in range(len(res)):
-        fila = res.iloc[i]
-        dic = fila.to_dict()
-        listaDic.append(dic)
-    
-
-
-    return listaDic
-
-#print((leer_parque2(narchivo,parque))[112])
 
 
 
@@ -219,7 +194,7 @@ c = especie_promedio_mas_inclinad(losAndes)
 
 
 
-#VAMOS A ARMAR UN DF
+#VAMOS A ARMAR UN D
 
 narchivo="arbolado-publico-lineal-2017-2018.csv"
 
@@ -247,3 +222,89 @@ pjr.rename(columns={"altura_tot": "altura_arbol", "nombre_com": "nombre_cientifi
 print(pjr.columns)
 
 #ya esta el de los parques con las columnas cambiadas, resta comparar
+
+
+pjr["ambiente"]= "parque"
+
+
+dfVeredasPosta["ambiente"] = "vereda"
+
+res=pd.concat([pjr,dfVeredasPosta])
+
+
+
+
+###########ME PARECE Q LO HICE MAL, EL PRIMER EJERCICIO NO DEVUELVE UNA LISTA DE DICCIONARIOS, SI NO UN DATAFRAME
+parque= "GENERAL PAZ"
+
+
+def leer_parque2(narchivo:str,parque:str):
+
+
+    df = pd.read_csv("arbolado-en-espacios-verdes.csv", index_col = 2)
+
+
+
+    res= df[df["espacio_ve"]==parque]
+
+    listaDic = []
+
+
+    for i in range(len(res)):
+        fila = res.iloc[i]
+        dic = fila.to_dict()
+        listaDic.append(dic)
+    
+
+
+    return listaDic
+
+listaArbol=leer_parque2("arbolado-en-espacios-verdes.csv", parque)
+
+def especies2(lista_arboles):
+    res=[]
+    for i in range(0,len(lista_arboles)):
+        if lista_arboles[i]["nombre_com"] not in res:
+            res.append(lista_arboles[i]["nombre_com"])
+            
+    return res
+        
+
+
+def contarEjemplares3(lista_arboles):
+    
+    res= {}
+    
+    for i in range(0,len(lista_arboles)):
+        if lista_arboles[i]["nombre_com"] not in res:
+            res[lista_arboles[i]["nombre_com"]] = 1
+        else:
+            res[lista_arboles[i]["nombre_com"]] += 1
+            
+    return res
+            
+def obtener_alturas2(lista_arboles, especie):
+    res = []
+    
+    for i in range(0,len(lista_arboles)):
+        es={}
+        if lista_arboles[i] == especie:
+            
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
