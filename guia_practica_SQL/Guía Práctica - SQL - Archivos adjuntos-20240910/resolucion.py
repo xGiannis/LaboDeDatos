@@ -22,7 +22,9 @@ from inline_sql import sql, sql_val
 # Importamos los datasets que vamos a utilizar en este programa
 #=============================================================================
 
-carpeta = "C:/Users/usuario/Desktop/LaboDeDatos/guia_practica_SQL/Guía Práctica - SQL - Archivos adjuntos-20240910/"
+#carpeta = "C:/Users/usuario/Desktop/LaboDeDatos/guia_practica_SQL/Guía Práctica - SQL - Archivos adjuntos-20240910/"
+
+carpeta = "~/Escritorio/LABO/LaboDeDatos/guia_practica_SQL/Guía Práctica - SQL - Archivos adjuntos-20240910/"
 
 
 # Ejercicios AR-PROJECT, SELECT, RENAME
@@ -474,7 +476,7 @@ cantidad total es mayor a 1000 casos.
 """
 
 depasPorProv=sql^"""
-SELECT DISTINCT d.id, d.descripcion as depa, d.id_provincia, p.descripcion as prov, (cantidad), anio
+SELECT DISTINCT d.id, d.descripcion as depa, d.id_provincia, p.descripcion as prov, (cantidad), anio, c.id
 FROM departamento as d
 INNER JOIN provincia as p
 ON p.id = id_provincia

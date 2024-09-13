@@ -15,7 +15,7 @@ from inline_sql import sql, sql_val
 # Importamos los datasets que vamos a utilizar en este programa
 #=============================================================================
 
-carpeta = "~/Escritorio/clase6/filessql/"
+carpeta = "~/Escritorio/LABO/LaboDeDatos/clase6/filessql/"
 
 # Ejercicios AR-PROJECT, SELECT, RENAME
 empleado       = pd.read_csv(carpeta+"empleado.csv")
@@ -806,6 +806,9 @@ dataframeResultado = sql^ consultaSQL
 #=============================================================================
 # a.- Consigna: En la descripción de los roles de los empleados reemplazar las ñ por ni
 
+
+
+
 consultaSQL = """
 
               """
@@ -819,12 +822,100 @@ dataframeResultado = sql^ consultaSQL
 # a.- Mostrar para cada estudiante las siguientes columnas con sus datos: Nombre, Sexo, Edad, Nota-Parcial-01, Nota-Parcial-02, Recuperatorio-01 y , Recuperatorio-02
 
 # ... Paso 1: Obtenemos los datos de los estudiantes
+
+
+
 consultaSQL = """
+SELECT DISTINCT e.nombre, sexo, edad, parcial_01, parcial_02, recuperatorio01, recuperatorio02
+FROM examen as e
+LEFT OUTER JOIN(
+    SELECT p1.nota as parcial_01, p1.nombre
+    FROM examen as p1
+    WHERE p1.Instancia = 'Parcial-01'
+    ) AS p1
+ON e.nombre = p1.nombre
+
+LEFT OUTER JOIN(
+    SELECT p2.nota as parcial_02, p2.nombre
+    FROM examen as p2
+    WHERE p2.Instancia = 'Parcial-02'
+    ) AS p2
+ON e.nombre = p2.nombre
+
+LEFT OUTER JOIN(
+    SELECT r1.nota as recuperatorio01, r1.nombre
+    FROM examen as r1
+    WHERE r1.Instancia = 'Recuperatorio-01'
+    ) AS r1
+ON e.nombre = r1.nombre
+
+LEFT OUTER JOIN(
+    SELECT p1.nota as recuperatorio02, p1.nombre
+    FROM examen as p1
+    WHERE p1.Instancia = 'Recuperatorio-02'
+    ) AS r2
+ON e.nombre = r2.nombre
 
               """
+       
+desafio_01 = sql^ consultaSQL
+       
+#####################FORMA 2
+p1 = sql^"""
+SELECT nota, instancia, nombre
+FROM examen as e
+WHERE instancia = 'Parcial-01'
+"""
 
 
-desafio_01 = consultaSQL
+p2 = sql^"""
+SELECT nota, instancia, nombre
+FROM examen as e
+WHERE instancia = 'Parcial-02'
+"""
+
+r1= sql^"""
+SELECT nota, instancia, nombre
+FROM examen as e
+WHERE instancia = 'Recuperatorio-01'
+"""
+
+r2= sql^"""
+SELECT nota, instancia, nombre
+FROM examen as e
+WHERE instancia = 'Recuperatorio-02'
+"""
+
+parciales1=sql^"""
+SELECT DISTINCT e.nombre, sexo, edad, p1.nota as parcial1
+FROM examen as e
+LEFT OUTER JOIN p1
+ON p1.nombre = e.nombre
+
+"""
+
+parciales2=sql^"""
+SELECT e.nombre, sexo, edad,parcial1, p2.nota as parcial2
+FROM parciales1 as e
+LEFT OUTER JOIN p2 
+ON p2.nombre = e.nombre
+"""
+
+recuperatorios1=sql^"""
+SELECT e.nombre, sexo, edad, r1.nota as recuperatorio01, parcial1, parcial2
+FROM parciales2 as e
+LEFT OUTER JOIN r1
+ON r1.nombre = e.nombre
+"""
+
+recuperatorios2=sql^"""
+SELECT e.nombre, sexo, edad,parcial1, parcial2, recuperatorio01, r2.nota as recuperatorio02
+FROM recuperatorios1 as e
+LEFT OUTER JOIN r2
+ON r2.nombre = e.nombre 
+"""
+
+##############################
 
 
 
@@ -832,7 +923,12 @@ desafio_01 = consultaSQL
 # b.- Agregar al ejercicio anterior la columna Estado, que informa si el alumno aprobó la cursada (APROBÓ/NO APROBÓ). Se aprueba con 4.
 
 consultaSQL = """
-                 
+SELECT *, 
+    CASE WHEN (parcial_01>= 4 and parcial_02 >= 4) OR (recuperatorio01>=4 AND parcial_02>=4 ) OR(recuperatorio02>=4 and parcial_01 >=4) OR (recuperatorio01>=4 and recuperatorio02>=4)
+        THEN 'APROBO'
+        ELSE 'NO APROBO'
+        END AS ESTADO
+FROM desafio_01
               """
 
 desafio_02 = sql^ consultaSQL
