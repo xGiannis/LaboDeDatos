@@ -22,9 +22,9 @@ from inline_sql import sql, sql_val
 # Importamos los datasets que vamos a utilizar en este programa
 #=============================================================================
 
-#carpeta = "C:/Users/usuario/Desktop/LaboDeDatos/guia_practica_SQL/Guía Práctica - SQL - Archivos adjuntos-20240910/"
+carpeta = "C:/Users/usuario/Desktop/LaboDeDatos/guia_practica_SQL/Guía Práctica - SQL - Archivos adjuntos-20240910/"
 
-carpeta = "~/Escritorio/LABO/LaboDeDatos/guia_practica_SQL/Guía Práctica - SQL - Archivos adjuntos-20240910/"
+#carpeta = "~/Escritorio/LABO/LaboDeDatos/guia_practica_SQL/Guía Práctica - SQL - Archivos adjuntos-20240910/"
 
 
 # Ejercicios AR-PROJECT, SELECT, RENAME
@@ -476,7 +476,7 @@ cantidad total es mayor a 1000 casos.
 """
 
 depasPorProv=sql^"""
-SELECT DISTINCT d.id, d.descripcion as depa, d.id_provincia, p.descripcion as prov, (cantidad), anio, c.id
+SELECT DISTINCT d.id, d.descripcion as depa, d.id_provincia, p.descripcion as prov, (cantidad), anio, c.id as id_caso
 FROM departamento as d
 INNER JOIN provincia as p
 ON p.id = id_provincia
@@ -533,5 +533,271 @@ GROUP BY d.prov
 
 
 
+"""k. Listar los nombres de departamento (y nombre de provincia) que tienen
+mediciones tanto para el año 2019 como para el año 2020. Para cada uno de
+ellos devolver la cantidad de casos promedio. Ordenar por nombre de
+provincia (ascendente) y luego por nombre de departamento (ascendente).
+"""
+
+
+
+depasPorProv=sql^"""
+SELECT DISTINCT d.id, d.descripcion as depa, d.id_provincia, p.descripcion as prov, (cantidad), anio, c.id as id_caso
+FROM departamento as d
+INNER JOIN provincia as p
+ON p.id = id_provincia
+  JOIN casos as c
+ON c.id_depto=d.id
+ORDER BY id_provincia
+
+"""
+
+
+consultaSQL="""
+SELECT DISTINCT AVG(cantidad), depa, prov
+FROM depasPorProv
+GROUP BY depa, prov
+ORDER BY prov ASC, depa DESC
+"""
+
+
+
+
+dataframeResultado = sql^ consultaSQL
+
+
+
+
+
+
+
+"""l. Devolver una tabla que tenga los siguientes campos: descripción de tipo de
+evento, id_depto, nombre de departamento, id_provincia, nombre de
+provincia, total de casos 2019, total de casos 2020.
+"""
+
+
+
+casosConTipoev = sql^"""
+SELECT DISTINCT d.descripcion as depto, id_depto,id_provincia,t.descripcion as tipo_evento
+FROM casos as c
+INNER JOIN departamento as d
+ON d.id = id_depto
+INNER JOIN tipoevento as t
+ON c.id_tipoevento = t.id
+GROUP BY id_depto, depto, id_provincia, tipo_evento
+"""
+
+casosDepto2019 = sql^"""
+SELECT SUM(t1.cantidad) as casos_2019, t1.id_depto
+FROM casos as t1
+WHERE t1.anio = 2019
+GROUP BY id_depto
+"""
+
+
+casosDepto2020 = sql^"""
+SELECT SUM(t1.cantidad) as casos_2020, t1.id_depto
+FROM casos as t1
+WHERE t1.anio = 2020
+GROUP BY id_depto
+"""
+
+casos20202019=sql^"""
+SELECT casos_2019, casos_2020, c1.id_depto
+FROM casosDepto2020 as c1
+LEFT OUTER JOIN casosDepto2019 as c2
+ON c1.id_depto = c2.id_depto
+"""
+
+consultaSQL="""
+SELECT DISTINCT *
+FROM casosConTipoev as cev
+lEFT OUTER JOIN casos20202019 as c
+ON c.id_depto = cev.id_depto
+"""
+
+
+dataframeResultado = sql^ consultaSQL
+
+
+
+#E. Subconsultas (ALL, ANY)
+
+"""a. Devolver el departamento que tuvo la mayor cantidad de casos sin hacer uso
+de MAX, ORDER BY ni LIMIT"""
+
+consultaSQL="""
+SELECT DISTINCT id_depto, 
+FROM casos as c
+GROUP BY id_depto
+HAVING SUM(c.cantidad) >= ALL(
+    SELECT SUM(c2.cantidad)
+    FROM casos as c2
+    GROUP BY c2.id_depto
+    )
+
+"""
+
+
+dataframeResultado = sql^ consultaSQL
+
+
+
+"""b. Devolver los tipo de evento que tienen casos asociados. (Utilizando ALL o
+ANY).
+"""
+
+
+consultaSQL="""
+SELECT DISTINCT descripcion
+FROM tipoevento as t
+WHERE t.id = ANY(
+    SELECT id_tipoevento
+    FROM casos
+    )
+
+"""
+
+
+dataframeResultado = sql^ consultaSQL
+
+
+
+#F. Subconsultas (IN, NOT IN)
+
+
+"""a. Devolver los tipo de evento que tienen casos asociados (Utilizando IN, NOT
+IN).
+"""
+
+consultaSQL="""
+SELECT DISTINCT descripcion
+FROM tipoevento as t
+WHERE t.id IN(
+    SELECT id_tipoevento
+    FROM casos
+    )
+
+"""
+
+dataframeResultado = sql^ consultaSQL
+
+"""b. Devolver los tipo de evento que NO tienen casos asociados (Utilizando IN,
+NOT IN).
+"""
+
+consultaSQL="""
+SELECT DISTINCT descripcion
+FROM tipoevento as t
+WHERE t.id NOT IN(
+    SELECT id_tipoevento
+    FROM casos
+    )
+
+"""
+
+
+dataframeResultado = sql^ consultaSQL
+
+
+
+#G. Subconsultas (EXISTS, NOT EXISTS)
+
+"""a. Devolver los tipo de evento que tienen casos asociados (Utilizando EXISTS,
+NOT EXISTS)."""
+    
+    
+
+consultaSQL="""
+SELECT DISTINCT descripcion
+FROM tipoevento as t
+WHERE EXISTS(
+    SELECT id_tipoevento
+    FROM casos as c
+    WHERE t.id = c.id_tipoevento
+    )
+
+"""
+
+
+dataframeResultado = sql^ consultaSQL
+
+"""a. Devolver los tipo de evento que NO tienen casos asociados (Utilizando EXISTS,
+NOT EXISTS)."""
+    
+    
+consultaSQL="""
+SELECT DISTINCT descripcion
+FROM tipoevento as t
+WHERE NOT EXISTS(
+    SELECT id_tipoevento
+    FROM casos as c
+    WHERE t.id = c.id_tipoevento
+    )
+
+"""
+dataframeResultado = sql^ consultaSQL
+
+#H. Subconsultas correlacionadas
+
+"""a. Listar las provincias que tienen una cantidad total de casos mayor al
+promedio de casos del país. Hacer el listado agrupado por año.
+"""
+
+depasPorProv=sql^"""
+SELECT DISTINCT d.id, d.descripcion as depa, d.id_provincia, p.descripcion as prov, (cantidad), anio, c.id as id_caso
+FROM departamento as d
+INNER JOIN provincia as p
+ON p.id = id_provincia
+INNER JOIN casos as c
+ON c.id_depto=d.id
+ORDER BY id_provincia
+
+"""
+
+casosPromedio = sql^"""
+SELECT DISTINCT AVG(cantidad) as cantidad_promedio, id_provincia, prov
+FROM depasPorProv
+GROUP BY id_provincia, prov
+"""
+
+
+promedio=sql^"""
+SELECT AVG(p2.cantidad_promedio) as average
+FROM casosPromedio as p2
+"""
+
+approach2=sql^"""
+SELECT DISTINCT AVG(cantidad) as cantidad_promedio, cp.id_provincia, cp.prov, anio
+FROM depasPorProv as dp
+INNER JOIN casosPromedio cp
+ON cp.id_provincia = dp.id_provincia 
+WHERE cp.cantidad_promedio >=(
+    SELECT AVG(p2.cantidad_promedio) as average
+    FROM casosPromedio as p2
+    )
+GROUP BY cp.id_provincia, cp.prov, anio
+ORDER BY anio
+
+
+"""
+#no termine usando promedio, fue para ver nomas q onda
+
+"""b. Por cada año, listar las provincias que tuvieron una cantidad total de casos
+mayor a la cantidad total de casos que la provincia de Corrientes.
+"""
+consultaSQL=sql^"""
+SELECT DISTINCT SUM(cp.cantidad) as cant_total, cp.id_provincia, cp.prov
+FROM depasPorProv as cp
+GROUP BY cp.id_provincia, cp.prov
+HAVING cant_total >=(
+    SELECT SUM(p2.cantidad) as cantidadCorrientes
+    FROM depasPorProv as p2
+    WHERE p2.id_provincia = 18
+    GROUP BY p2.prov
+    )
+ORDER BY cant_total
+"""
 
 
