@@ -801,3 +801,56 @@ ORDER BY cant_total
 """
 
 
+#I. Más consultas sobre una tabla
+
+
+"""a. Listar los códigos de departamento y sus nombres, ordenados por estos
+últimos (sus nombres) de manera descendentes (de la Z a la A). En caso de
+empate, desempatar por código de departamento de manera ascendente.
+"""
+consultaSQL=sql^"""
+SELECT DISTINCT id, descripcion
+FROM departamento
+ORDER BY descripcion ASC, id DESC
+"""
+
+
+"""b. Listar los registros de la tabla provincia cuyos nombres comiencen con la
+letra M"""
+
+
+consultaSQL=sql^"""
+SELECT DISTINCT *
+FROM provincia
+WHERE descripcion LIKE 'M%'
+"""
+
+"""c. Listar los registros de la tabla provincia cuyos nombres 
+comiencen con la letra S y su quinta letra sea una letra A.
+"""
+consultaSQL=sql^"""
+SELECT DISTINCT *
+FROM provincia
+WHERE descripcion LIKE 'S%' AND descripcion LIKE '____a%'
+"""
+
+"""d. Listar los registros de la tabla provincia 
+cuyos nombres terminan con la letra A
+"""
+consultaSQL=sql^"""
+SELECT DISTINCT *
+FROM provincia
+WHERE descripcion LIKE '%a'
+"""
+
+
+"""e. Listar los registros de la tabla provincia cuyos nombres tengan
+exactamente 5 letras.
+"""
+consultaSQL=sql^"""
+SELECT DISTINCT *
+FROM provincia
+WHERE descripcion LIKE '_____'
+"""
+
+
